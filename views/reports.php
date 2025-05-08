@@ -1,5 +1,5 @@
 <?php
-require_once 'models/Report.php';
+require_once 'models/entities/report.php';
 
 // Obtener los reportes disponibles
 $reportModel = new Report();
@@ -18,26 +18,29 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     $selectedReport = $reportModel->getById($reportId);
     
     // Obtener el ingreso asociado al reporte
-    require_once 'models/Income.php';
+    require_once 'models/entities/income.php';
     $incomeModel = new Income();
     $income = $incomeModel->getByReportId($reportId);
     
     // Obtener los gastos asociados al reporte
-    require_once 'models/Bill.php';
+    require_once 'models/entities/bill.php';
     $billModel = new Bill();
     $bills = $billModel->getByReportId($reportId);
     
     // Calcular gastos totales
     $totalExpenses = 0;
-    foreach ($bills as $bill) {
-        $totalExpenses += $bill['value'];
-    }
-    
-    // Calcular ahorro y porcentaje de ahorro
-    if ($income) {
-        $savings = $income['value'] - $totalExpenses;
-        $savingsPercentage = ($savings / $income['value']) * 100;
-    }
+foreach ($bills as $bill) {
+    $totalExpenses += $bill['value'];
+}
+
+// Calcular ahorro y porcentaje de ahorro
+if ($income && isset($income['value']) && $income['value'] > 0) {
+    $savings = $income['value'] - $totalExpenses;
+    $savingsPercentage = ($savings / $income['value']) * 100;
+} else {
+    $savings = 0;
+    $savingsPercentage = 0;
+}
 }
 ?>
 

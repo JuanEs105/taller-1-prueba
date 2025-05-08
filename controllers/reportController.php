@@ -73,7 +73,7 @@ class ReportController {
             $savings = $income - $billSum;
             $savingsPercentage = ($savings / $income) * 100;
 
-            include 'views/reportes.php';
+            include 'views/reports.php';
         } else {
             echo "<script>alert('ID de reporte no proporcionado');</script>";
             echo "<script>window.location.href = 'index.php?controller=report&action=index';</script>";
