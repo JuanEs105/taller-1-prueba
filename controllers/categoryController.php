@@ -10,64 +10,103 @@ class CategoryController {
 
     public function index() {
         $categories = $this->categoryModel->getAll();
+        $messages = [];
+        
+        // Manejo de mensajes de error o éxito
+        if (isset($_GET['error'])) {
+            $messages['danger'] = $_GET['error'];
+        }
+        if (isset($_GET['success'])) {
+            $messages['success'] = $_GET['success'];
+        }
+        
+        // Obtener categoría en edición si existe
+        $categoryToEdit = null;
+        if (isset($_GET['edit_id'])) {
+            $category = new Category();
+            if ($category->getById($_GET['edit_id'])) {
+                $categoryToEdit = $category;
+            }
+        }
+        
         include 'views/form_category.php';
     }
 
     public function save() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name = $_POST['name'];
-            $percentage = $_POST['percentage'];
+            $name = trim($_POST['name']);
+            $percentage = (float) str_replace(',', '.', $_POST['percentage']);
 
-            // Validar que el porcentaje sea mayor a cero y no supere el 100%
+            // Validaciones
+            if (empty($name)) {
+                header("Location: index.php?controller=category&action=index&error=El nombre no puede estar vacío");
+                exit();
+            }
+
             if ($percentage <= 0 || $percentage > 100) {
-                echo "<script>alert('El porcentaje debe ser mayor a cero y no puede superar el 100%');</script>";
-                echo "<script>window.location.href = 'index.php?controller=category&action=index';</script>";
-                return;
+                header("Location: index.php?controller=category&action=index&error=El porcentaje debe ser entre 0.01 y 100");
+                exit();
             }
 
             $this->categoryModel->setName($name);
             $this->categoryModel->setPercentage($percentage);
             
             if ($this->categoryModel->save()) {
-                echo "<script>alert('Categoría guardada correctamente');</script>";
+                header("Location: index.php?controller=category&action=index&success=Categoría guardada correctamente");
             } else {
-                echo "<script>alert('Error al guardar la categoría');</script>";
+                header("Location: index.php?controller=category&action=index&error=Error al guardar la categoría");
             }
+            exit();
         }
-        echo "<script>window.location.href = 'index.php?controller=category&action=index';</script>";
+        header("Location: index.php?controller=category&action=index");
+        exit();
+    }
+
+    public function edit() {
+        if (isset($_GET['id'])) {
+            header("Location: index.php?controller=category&action=index&edit_id=".$_GET['id']);
+            exit();
+        }
+        header("Location: index.php?controller=category&action=index");
+        exit();
     }
 
     public function update() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'];
-            $name = $_POST['name'];
-            $percentage = $_POST['percentage'];
+            $name = trim($_POST['name']);
+            $percentage = (float) str_replace(',', '.', $_POST['percentage']);
 
-            // Validar que el porcentaje sea mayor a cero y no supere el 100%
+            // Validaciones
+            if (empty($name)) {
+                header("Location: index.php?controller=category&action=index&edit_id=".$id."&error=El nombre no puede estar vacío");
+                exit();
+            }
+
             if ($percentage <= 0 || $percentage > 100) {
-                echo "<script>alert('El porcentaje debe ser mayor a cero y no puede superar el 100%');</script>";
-                echo "<script>window.location.href = 'index.php?controller=category&action=index';</script>";
-                return;
+                header("Location: index.php?controller=category&action=index&edit_id=".$id."&error=El porcentaje debe ser entre 0.01 y 100");
+                exit();
             }
 
             // Verificar si la categoría tiene gastos relacionados
             if ($this->categoryModel->hasRelatedBills($id)) {
-                echo "<script>alert('No se puede modificar la categoría porque tiene gastos relacionados');</script>";
-                echo "<script>window.location.href = 'index.php?controller=category&action=index';</script>";
-                return;
+                header("Location: index.php?controller=category&action=index&edit_id=".$id."&error=No se puede modificar una categoría con gastos asociados");
+                exit();
             }
 
-            $this->categoryModel->getById($id);
+            $this->categoryModel->setId($id);
             $this->categoryModel->setName($name);
             $this->categoryModel->setPercentage($percentage);
-            
+
             if ($this->categoryModel->update()) {
-                echo "<script>alert('Categoría actualizada correctamente');</script>";
+                header("Location: index.php?controller=category&action=index&success=Categoría actualizada correctamente");
             } else {
-                echo "<script>alert('Error al actualizar la categoría');</script>";
+                header("Location: index.php?controller=category&action=index&edit_id=".$id."&error=Error al actualizar la categoría");
             }
-            echo "<script>window.location.href = 'index.php?controller=category&action=index';</script>";
+            exit();
         }
+        header("Location: index.php?controller=category&action=index");
+        exit();
     }
 
     public function delete() {
@@ -76,20 +115,19 @@ class CategoryController {
             
             // Verificar si la categoría tiene gastos relacionados
             if ($this->categoryModel->hasRelatedBills($id)) {
-                echo "<script>alert('No se puede eliminar la categoría porque tiene gastos relacionados');</script>";
-                echo "<script>window.location.href = 'index.php?controller=category&action=index';</script>";
-                return;
+                header("Location: index.php?controller=category&action=index&error=No se puede eliminar una categoría con gastos asociados");
+                exit();
             }
             
             if ($this->categoryModel->delete($id)) {
-                echo "<script>alert('Categoría eliminada correctamente');</script>";
+                header("Location: index.php?controller=category&action=index&success=Categoría eliminada correctamente");
             } else {
-                echo "<script>alert('Error al eliminar la categoría');</script>";
+                header("Location: index.php?controller=category&action=index&error=Error al eliminar la categoría");
             }
-        } else {
-            echo "<script>alert('ID de categoría no proporcionado');</script>";
+            exit();
         }
-        echo "<script>window.location.href = 'index.php?controller=category&action=index';</script>";
+        header("Location: index.php?controller=category&action=index&error=ID de categoría no proporcionado");
+        exit();
     }
 }
 ?>

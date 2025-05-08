@@ -44,7 +44,7 @@ class Category {
             $statement->bindParam(":percentage", $this->percentage);
             return $statement->execute();
         } catch (PDOException $e) {
-            echo "Error al guardar categoría: " . $e->getMessage();
+            error_log("Error al guardar categoría: " . $e->getMessage());
             return false;
         }
     }
@@ -58,7 +58,7 @@ class Category {
             $statement->bindParam(":id", $this->id);
             return $statement->execute();
         } catch (PDOException $e) {
-            echo "Error al actualizar categoría: " . $e->getMessage();
+            error_log("Error al actualizar categoría: " . $e->getMessage());
             return false;
         }
     }
@@ -70,7 +70,7 @@ class Category {
             $statement->bindParam(":id", $id);
             return $statement->execute();
         } catch (PDOException $e) {
-            echo "Error al eliminar categoría: " . $e->getMessage();
+            error_log("Error al eliminar categoría: " . $e->getMessage());
             return false;
         }
     }
@@ -87,11 +87,11 @@ class Category {
                 $this->id = $result['id'];
                 $this->name = $result['name'];
                 $this->percentage = $result['percentage'];
-                return true;
+                return $this; // Devuelve el objeto actual con los datos cargados
             }
             return false;
         } catch (PDOException $e) {
-            echo "Error al obtener categoría: " . $e->getMessage();
+            error_log("Error al obtener categoría: " . $e->getMessage());
             return false;
         }
     }
@@ -103,7 +103,7 @@ class Category {
             $statement->execute();
             return $statement->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            echo "Error al obtener categorías: " . $e->getMessage();
+            error_log("Error al obtener categorías: " . $e->getMessage());
             return [];
         }
     }
@@ -118,7 +118,7 @@ class Category {
             
             return $result['count'] > 0;
         } catch (PDOException $e) {
-            echo "Error al verificar relaciones: " . $e->getMessage();
+            error_log("Error al verificar relaciones: " . $e->getMessage());
             return true; // Por seguridad, si hay un error, asumimos que hay relaciones
         }
     }

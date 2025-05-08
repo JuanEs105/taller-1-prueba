@@ -50,17 +50,18 @@ class Income {
     }
 
     public function update() {
-        try {
-            $query = "UPDATE income SET value = :value WHERE id = :id";
-            $statement = $this->conexion->prepare($query);
-            $statement->bindParam(":value", $this->value);
-            $statement->bindParam(":id", $this->id);
-            return $statement->execute();
-        } catch (PDOException $e) {
-            echo "Error al actualizar ingreso: " . $e->getMessage();
-            return false;
-        }
+    try {
+        // Solo actualizamos el valor, no el idReport
+        $query = "UPDATE income SET value = :value WHERE id = :id";
+        $statement = $this->conexion->prepare($query);
+        $statement->bindParam(":value", $this->value);
+        $statement->bindParam(":id", $this->id);
+        return $statement->execute();
+    } catch (PDOException $e) {
+        echo "Error al actualizar ingreso: " . $e->getMessage();
+        return false;
     }
+}
 
     public function getByReportId($reportId) {
         try {
